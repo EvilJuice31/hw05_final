@@ -101,6 +101,7 @@ def server_error(request):
     return render(request, "misc/500.html", status=500)
 
 
+@login_required(login_url='/auth/login/')
 def add_comment(request, username, post_id):
     post = get_object_or_404(Post, pk=post_id)
     comment = Comment.objects.filter(post = post).all()
@@ -116,7 +117,7 @@ def add_comment(request, username, post_id):
         else:
             form = CommentForm()
         return redirect('post', username=post.author.username, post_id=post_id,)
-    return redirect('post', username=post.author.username, post_id=post_id,)
+    
 
 @login_required
 def follow_index(request):
