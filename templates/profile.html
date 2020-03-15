@@ -2,7 +2,9 @@
 {% block title %} Профиль {{profile.username}} {% endblock %}
 
 {% block content %}
-{% include "about_author.html" %}
+{% if user.is_authenticated %}
+    {% include "about_author.html" %}
+{% endif %}
 <main role="main" class="container">
     <div class="table">
 

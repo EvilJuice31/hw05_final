@@ -44,15 +44,17 @@ def new_post(request):
     return render(request, 'new_post.html', {'form': form})
 
 def profile(request, username):
+    following = False
     profile = get_object_or_404(User, username=username)
     post_list = Post.objects.filter(author=profile).order_by("-pub_date").all()
     paginator = Paginator(post_list, 10)
     page_number = request.GET.get('page')
     page = paginator.get_page(page_number)
-    if Follow.objects.filter(user= request.user, author=profile).exists():
-        following = True
-    else:
-        following = False
+    if request.user.is_authenticated:
+        if Follow.objects.filter(user= request.user, author=profile).exists():
+            following = True
+        else:
+            following = False
     count = Post.objects.filter(author=profile).count()
     follower = Follow.objects.filter(author=profile).count()
     followers = Follow.objects.filter(user=profile).count()
@@ -73,7 +75,11 @@ def post_view(request, username, post_id):
     post = get_object_or_404(Post, pk=post_id)
     comments = Comment.objects.filter(post = post).order_by("-created")
     form = CommentForm()
-    return render(request, "post.html", {'post': post, 'profile': profile, 'count': count, 'comments': comments, 'form':form})
+    return render(request, "post.html",{'post': post,
+                                        'profile': profile,
+                                        'count': count,
+                                        'comments': comments,
+                                        'form':form})
 
 def post_edit(request, username, post_id):
     post = get_object_or_404(Post, pk=post_id)
@@ -103,21 +109,18 @@ def server_error(request):
 
 @login_required(login_url='/auth/login/')
 def add_comment(request, username, post_id):
-    if request.user.is_authenticated:
-        post = get_object_or_404(Post, pk=post_id)
-        comments = Comment.objects.all()
-        if request.method == 'POST':
-            form = CommentForm(request.POST)
-            if form.is_valid():
-                Comment.objects.create(
-                    post = post,
-                    author = request.user,
-                    text = form.cleaned_data['text']
-                )
-                return redirect('post', username=post.author, post_id=post_id)
-        return render(request, "post.html", {'form': form, 'post':post})
+    post = get_object_or_404(Post, pk=post_id)
+    if request.method == 'POST':
+        form = CommentForm(request.POST)
+        if form.is_valid():
+            comment = form.save(commit=False)
+            comment.post = post
+            comment.author = request.user
+            comment.save()
+            return redirect('post', username=post.author.username, post_id=post_id)
     else:
-        return redirect('login')
+        form = CommentForm()
+    return redirect('post', username=post.author.username, post_id=post_id,)
     
 
 @login_required
