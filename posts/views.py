@@ -105,16 +105,17 @@ def server_error(request):
 def add_comment(request, username, post_id):
     post = get_object_or_404(Post, pk=post_id)
     comment = Comment.objects.filter(post = post).all()
-    if request.method == 'POST':
-        form = CommentForm(request.POST)
-        if form.is_valid():
-            comment.author = request.user.is_authenticated
-            comment = form.save(commit=False)
-            comment.post = post
-            comment.save()
-            return redirect('post', username=post.author.username, post_id=post_id)
-    else:
-        form = CommentForm()
+    if request.user.is_authenticated:
+        if request.method == 'POST':
+            form = CommentForm(request.POST)
+            if form.is_valid():
+                comment.author = request.user
+                comment = form.save(commit=False)
+                comment.post = post
+                comment.save()
+                return redirect('post', username=post.author.username, post_id=post_id)
+        else:
+            form = CommentForm()
     return redirect('post', username=post.author.username, post_id=post_id,)
 
 @login_required
