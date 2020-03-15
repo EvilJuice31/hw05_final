@@ -103,20 +103,21 @@ def server_error(request):
 
 @login_required(login_url='/auth/login/')
 def add_comment(request, username, post_id):
+    if request.user.is_authenticated:
         post = get_object_or_404(Post, pk=post_id)
-        comment = Comment.objects.filter(post = post).all()
+        comments = Comment.objects.all()
         if request.method == 'POST':
             form = CommentForm(request.POST)
             if form.is_valid():
-                comment.author = request.user
-                comment = form.save(commit=False)
-                comment.post = post
-                comment.save()
-                return redirect('post', username=post.author.username, post_id=post_id)
-        else:
-            form = CommentForm()
-        return redirect('index')
-    #return redirect('index')
+                Comment.objects.create(
+                    post = post,
+                    author = request.user,
+                    text = form.cleaned_data['text']
+                )
+                return redirect('post', username=post.author, post_id=post_id)
+        return render(request, "post.html", {'form': form, 'post':post})
+    else:
+        return redirect('login')
     
 
 @login_required
