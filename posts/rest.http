@@ -1,0 +1,12 @@
+
+POST http://127.0.0.1:8000/auth/login/
+content-type: text/html
+
+{
+    "username": "admin",
+    "password": "admin"
+}
+
+
+###
+POST http://127.0.0.1:8000/new/

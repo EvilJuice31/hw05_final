@@ -1,0 +1,17 @@
+{% extends "base.html" %} 
+{% block title %} Последние обновления {% endblock %}
+
+{% block content %}
+<main role="main" class="container">
+<div class="table">
+
+        <h1> Последние обновления на сайте</h1>
+
+
+            <!-- Вот он, новый include! -->
+            {% include "post_item.html" with post=post %}
+
+        {% include 'comments.html' with post=post items=comments %}
+</div>
+</main>
+{% endblock %}

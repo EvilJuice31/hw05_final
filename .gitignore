@@ -1,6 +1,7 @@
 .git/*
 env/
 venv/
+media/
 
 __pycache__/
 *.py[cod]
@@ -15,6 +16,5 @@ __pycache__/
 
 static/
 posts/static/
-media/
 
 db.sqlite3
