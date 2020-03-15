@@ -103,7 +103,6 @@ def server_error(request):
 
 @login_required(login_url='/auth/login/')
 def add_comment(request, username, post_id):
-    if request.user.is_authenticated:
         post = get_object_or_404(Post, pk=post_id)
         comment = Comment.objects.filter(post = post).all()
         if request.method == 'POST':
@@ -116,8 +115,8 @@ def add_comment(request, username, post_id):
                 return redirect('post', username=post.author.username, post_id=post_id)
         else:
             form = CommentForm()
-        return redirect('post', username=post.author.username, post_id=post_id,)
-    return redirect('index')
+        return redirect('index')
+    #return redirect('index')
     
 
 @login_required
