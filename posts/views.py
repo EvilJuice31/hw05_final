@@ -108,9 +108,9 @@ def add_comment(request, username, post_id):
     if request.method == 'POST':
         form = CommentForm(request.POST)
         if form.is_valid():
+            comment.author = request.user.is_authenticated
             comment = form.save(commit=False)
             comment.post = post
-            comment.author = request.user.is_authenticated
             comment.save()
             return redirect('post', username=post.author.username, post_id=post_id)
     else:
