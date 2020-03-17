@@ -42,6 +42,8 @@ class TestPost(TestCase):
         self.assertEqual(response.status_code, 200)
 
         #проверка что новый пост добален на главную страницу.
+        self.client.get(reverse('index'))
+        time.sleep(16)
         resp = self.client.get(reverse('index'))
         self.assertContains(resp, "My first post")
 
@@ -60,6 +62,7 @@ class TestPost(TestCase):
         Проверка корректного редактирования поста.
         """
         self.client.login(username='mike', password='12345')
+        
 
         resp = self.client.post(
             reverse("new_post"), {'text': 'My first post'}, follow=True)
@@ -69,10 +72,9 @@ class TestPost(TestCase):
                          'text': 'My second post'}, follow=True)
 
         #проверка исправленного поста на главной странице.
-        #resp = self.client.get(reverse('index'))
-        #time.sleep(10)
-        #resp = self.client.get(reverse('index'))
-        #self.assertContains(resp, "My second post")
+        time.sleep(16)
+        resp = self.client.get(reverse('index'))
+        self.assertContains(resp, "My second post")
 
         #проверка исправленного поста в профиле.
         resp = self.client.post(
@@ -120,7 +122,7 @@ class TestImg(TestCase):
         self.client.login(username='mike', password='12345')
         self.group = Group.objects.create(
             title='cat', slug='cats', description='цитаты о котиках')
-        with open('media/posts/1.jpg', 'rb') as fp:
+        with open('1.jpg', 'rb') as fp:
             self.client.post(
                 reverse("new_post"), {'group': 1, 'text': 'My first post', 'image': fp}, follow=True)
 

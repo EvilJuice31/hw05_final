@@ -2,6 +2,7 @@ from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.db.models import Count, Max
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
 
 from .forms import CommentForm, PostForm
 from .models import Comment, Follow, Group, Post, User
@@ -85,13 +86,13 @@ def post_edit(request, username, post_id):
     post = get_object_or_404(Post, pk=post_id)
     comment = Comment.objects.filter(post = post).all()
     if request.user != post.author:
-        return redirect(f'/{username}/{post_id}/')
+        return redirect(reverse('post', args=[username, post_id]))
     if request.method == 'POST':
         form = PostForm(request.POST, files=request.FILES or None, instance=post)
         if form.is_valid():
             post = form.save(commit=True)
             post.save()
-            return redirect(f'/{username}/{post_id}/')
+            return redirect(reverse('post', args=[username, post_id]))
     else:
         form = PostForm(instance=post)
     return render(request, 'new_post.html', {'form': form, 'post': post})
@@ -127,7 +128,7 @@ def add_comment(request, username, post_id):
 def follow_index(request):
     #follow = Follow.objects.get(user=request.user) #Кто
     favorite_list = Follow.objects.select_related('author', 'user').filter(user=request.user)
-    author_list = [favorite.author for favorite in favorite_list]
+    author_list = favorite_list.values_list('author', flat=True)
     post_list = Post.objects.filter(author__in=author_list).order_by("-pub_date").all()
     paginator = Paginator(post_list, 10)
     page_number = request.GET.get('page')
